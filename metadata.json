@@ -1,0 +1,8 @@
+{
+  "name": "EcoSnap",
+  "description": "An AI-powered sustainable lifestyle coach that turns waste disposal into an interactive, gamified experience using Gemini 3 Pro and Veo.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
