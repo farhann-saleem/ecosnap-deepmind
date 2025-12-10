@@ -1,7 +1,8 @@
 import React from 'react';
 import { UserStats, HistoryItem } from '../types';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Leaf, Zap, Flame, Trophy, BrainCircuit } from 'lucide-react';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { Leaf, Zap, Flame, Trophy, BrainCircuit, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface DashboardProps {
     stats: UserStats;
@@ -11,100 +12,171 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ stats, history, onStartQuiz }) => {
     
-    // Mock chart data derived from history or static for demo
+    // Time-based greeting
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+    // Mock chart data for smooth curve
     const chartData = [
-        { name: 'M', items: 2 },
-        { name: 'T', items: 5 },
-        { name: 'W', items: 3 },
-        { name: 'T', items: 7 },
-        { name: 'F', items: 4 },
-        { name: 'S', items: stats.scans },
-        { name: 'S', items: 0 },
+        { name: 'Mon', xp: 120 },
+        { name: 'Tue', xp: 180 },
+        { name: 'Wed', xp: 150 },
+        { name: 'Thu', xp: 240 },
+        { name: 'Fri', xp: 200 },
+        { name: 'Sat', xp: stats.xp > 240 ? stats.xp : 280 }, // Dynamic based on current
+        { name: 'Sun', xp: stats.xp },
     ];
 
+    const container = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const item = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
+    };
+
     return (
-        <div className="pt-24 pb-32 px-6 max-w-lg mx-auto space-y-8 animate-in fade-in duration-500">
+        <motion.div 
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="pt-24 pb-32 px-6 max-w-lg mx-auto space-y-8"
+        >
             
             {/* Header / Welcome */}
-            <div className="flex justify-between items-end">
+            <motion.div variants={item} className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-display font-bold text-slate-900 leading-none mb-1">Eco Dashboard</h1>
-                    <p className="text-emerald-600 text-sm font-medium">Level 3 • Green Guardian</p>
+                    <span className="text-slate-400 font-medium text-sm mb-1 block">{greeting}, Green Guardian</span>
+                    <h1 className="text-3xl font-display font-bold text-slate-900 leading-none">Your Impact Hub</h1>
                 </div>
-                <div className="text-center">
-                     <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 px-3 py-1.5 rounded-full">
+                <div className="flex flex-col items-end">
+                     <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 px-3 py-1.5 rounded-full shadow-sm">
                         <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
-                        <span className="text-orange-600 font-bold font-mono">{stats.streak} Day</span>
+                        <span className="text-orange-700 font-bold font-mono text-sm">{stats.streak} Day Streak</span>
                      </div>
                 </div>
-            </div>
+            </motion.div>
 
-            {/* Daily Quiz Card */}
-            <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-600 to-purple-700 p-6 shadow-2xl shadow-indigo-200">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-3 opacity-90">
-                        <BrainCircuit className="w-5 h-5 text-white" />
-                        <span className="text-xs font-bold uppercase tracking-widest text-white">Daily Challenge</span>
+            {/* Holographic Daily Challenge Card */}
+            <motion.div variants={item} className="relative group perspective-1000">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2rem] opacity-75 blur-lg group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative overflow-hidden rounded-[2rem] bg-slate-900 p-1 shadow-2xl">
+                    <div className="bg-slate-900/90 backdrop-blur-xl rounded-[1.8rem] p-6 h-full relative overflow-hidden">
+                        {/* Abstract shapes */}
+                        <div className="absolute top-[-50%] left-[-20%] w-[300px] h-[300px] bg-indigo-500/30 rounded-full blur-[80px]"></div>
+                        <div className="absolute bottom-[-50%] right-[-20%] w-[300px] h-[300px] bg-purple-500/30 rounded-full blur-[80px]"></div>
+                        
+                        <div className="relative z-10">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
+                                    <BrainCircuit className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300">Daily Quest</span>
+                                </div>
+                                <span className="text-white/60 text-xs font-mono">Resets in 4h</span>
+                            </div>
+                            
+                            <h3 className="text-2xl font-bold text-white mb-2 leading-tight font-display">Master the Art of <br/>Composting</h3>
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="h-1 flex-1 bg-slate-700 rounded-full overflow-hidden">
+                                    <div className="h-full w-2/3 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full"></div>
+                                </div>
+                                <span className="text-emerald-400 text-xs font-bold">+50 XP</span>
+                            </div>
+
+                            <button 
+                                onClick={onStartQuiz}
+                                className="w-full bg-white text-slate-900 font-bold py-3.5 px-6 rounded-xl text-sm hover:bg-emerald-50 transition-colors shadow-lg flex items-center justify-center gap-2 group/btn"
+                            >
+                                Start Challenge
+                                <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                            </button>
+                        </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2 leading-tight">Master the Art of <br/>Composting</h3>
-                    <p className="text-indigo-100 text-sm mb-6 max-w-[80%]">Earn 50 XP by completing today's eco-trivia.</p>
-                    <button 
-                        onClick={onStartQuiz}
-                        className="bg-white text-indigo-900 font-bold py-3 px-6 rounded-xl text-sm hover:bg-indigo-50 transition-colors shadow-lg"
-                    >
-                        Start Quiz
-                    </button>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Stats Grid */}
-            <div>
-                <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-wider">Overview</h3>
+            <motion.div variants={item}>
+                <h3 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest px-1">Vital Statistics</h3>
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white border border-slate-200 p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow">
-                        <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-emerald-50 rounded-full blur-xl group-hover:bg-emerald-100 transition-colors"></div>
-                        <Leaf className="w-6 h-6 text-emerald-500" />
-                        <div>
-                            <span className="text-3xl font-display font-bold text-slate-900 block">{stats.scans}</span>
-                            <span className="text-xs text-slate-500 font-medium">Items Scanned</span>
+                    <div className="bg-white border border-slate-200 p-6 rounded-[2rem] flex flex-col justify-between h-40 relative overflow-hidden group shadow-sm hover:shadow-lg transition-all duration-300">
+                        <div className="absolute right-[-20px] top-[-20px] w-24 h-24 bg-emerald-100 rounded-full blur-2xl group-hover:bg-emerald-200 transition-colors opacity-60"></div>
+                        <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100 mb-2 z-10">
+                            <Leaf className="w-5 h-5 text-emerald-600" />
+                        </div>
+                        <div className="z-10">
+                            <span className="text-4xl font-display font-bold text-slate-900 block tracking-tight">{stats.scans}</span>
+                            <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Items Scanned</span>
                         </div>
                     </div>
-                    <div className="bg-white border border-slate-200 p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group shadow-sm hover:shadow-md transition-shadow">
-                        <div className="absolute right-[-10px] top-[-10px] w-20 h-20 bg-cyan-50 rounded-full blur-xl group-hover:bg-cyan-100 transition-colors"></div>
-                        <Zap className="w-6 h-6 text-cyan-500" />
-                        <div>
-                            <span className="text-3xl font-display font-bold text-slate-900 block">{stats.co2Saved.toFixed(1)}</span>
-                            <span className="text-xs text-slate-500 font-medium">kg CO2 Saved</span>
+                    
+                    <div className="bg-white border border-slate-200 p-6 rounded-[2rem] flex flex-col justify-between h-40 relative overflow-hidden group shadow-sm hover:shadow-lg transition-all duration-300">
+                        <div className="absolute right-[-20px] top-[-20px] w-24 h-24 bg-cyan-100 rounded-full blur-2xl group-hover:bg-cyan-200 transition-colors opacity-60"></div>
+                        <div className="w-10 h-10 rounded-full bg-cyan-50 flex items-center justify-center border border-cyan-100 mb-2 z-10">
+                            <Zap className="w-5 h-5 text-cyan-600" />
+                        </div>
+                        <div className="z-10">
+                            <span className="text-4xl font-display font-bold text-slate-900 block tracking-tight">{stats.co2Saved.toFixed(1)}</span>
+                            <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">kg CO₂ Saved</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Activity Chart */}
-            <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm">
+            <motion.div variants={item} className="bg-white border border-slate-200 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Weekly Impact</h3>
-                    <Trophy className="w-4 h-4 text-yellow-500" />
+                    <div>
+                        <h3 className="text-slate-900 font-bold text-lg font-display">XP Growth</h3>
+                        <p className="text-xs text-slate-400">Past 7 Days</p>
+                    </div>
+                    <div className="p-2 bg-emerald-50 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-emerald-600" />
+                    </div>
                 </div>
-                <div className="h-40 w-full">
+                <div className="h-48 w-full -ml-2 min-h-[12rem]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData}>
-                            <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', color: '#0f172a', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                cursor={{ fill: '#f1f5f9' }}
+                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis 
+                                dataKey="name" 
+                                stroke="#94a3b8" 
+                                fontSize={10} 
+                                tickLine={false} 
+                                axisLine={false}
+                                tickMargin={10}
                             />
-                            <Bar dataKey="items" radius={[4, 4, 4, 4]}>
-                                {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={index === 5 ? '#10b981' : '#cbd5e1'} />
-                                ))}
-                            </Bar>
-                        </BarChart>
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
+                                itemStyle={{ color: '#fff' }}
+                                cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
+                            />
+                            <Area 
+                                type="monotone" 
+                                dataKey="xp" 
+                                stroke="#10b981" 
+                                strokeWidth={3}
+                                fillOpacity={1} 
+                                fill="url(#colorXp)" 
+                            />
+                        </AreaChart>
                     </ResponsiveContainer>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

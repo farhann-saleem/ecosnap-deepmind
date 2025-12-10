@@ -36,30 +36,3 @@ export const DEMO_QUIZ: QuizQuestion = {
   correctAnswerIndex: 1,
   explanation: "After plastic is melted down, it is formed into 'nurdles', which are shipped to factories to make new products."
 };
-
-// --- VIDEO ASSETS ---
-
-// 1. Local Videos (Preferred)
-// Assumes files are in the public/videos/ directory
-export const LOCAL_VIDEOS = {
-  PLASTIC: "/videos/plastic.mp4",
-  WOOD: "/videos/wood.mp4",     
-  METAL: "/videos/metal.mp4",
-  GLASS: "/videos/glass.mp4",
-  ORGANIC: "/videos/organic.mp4",
-  EWASTE: "/videos/ewaste.mp4",
-};
-
-// 2. Remote Videos (Fallback)
-// High-quality Pexels direct links
-export const REMOTE_VIDEOS = {
-  PLASTIC: "https://videos.pexels.com/video-files/5527878/5527878-hd_1920_1080_25fps.mp4",
-  WOOD: "https://videos.pexels.com/video-files/8539634/8539634-hd_1920_1080_25fps.mp4",     
-  METAL: "https://videos.pexels.com/video-files/5849626/5849626-sd_640_360_24fps.mp4",
-  GLASS: "https://videos.pexels.com/video-files/4440866/4440866-sd_640_360_25fps.mp4",
-  ORGANIC: "https://videos.pexels.com/video-files/7659223/7659223-hd_1920_1080_25fps.mp4",
-  EWASTE: "https://videos.pexels.com/video-files/3196068/3196068-hd_1920_1080_25fps.mp4",
-};
-
-// Default fallback
-export const DEMO_VIDEO_URL = REMOTE_VIDEOS.PLASTIC;

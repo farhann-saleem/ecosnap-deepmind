@@ -19,9 +19,9 @@ const Navbar: React.FC<NavbarProps> = ({ xp, activeTab, setActiveTab }) => {
 
   return (
     <>
-      {/* Mobile/Desktop Dock - White Theme */}
-      <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4">
-        <div className="bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-2 shadow-xl shadow-slate-200/50 flex items-center gap-2 relative">
+      {/* Floating Dock - Premium Glassmorphism */}
+      <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="pointer-events-auto bg-white/70 backdrop-blur-2xl border border-white/20 rounded-[2.5rem] p-2.5 shadow-2xl shadow-slate-300/40 flex items-center gap-3 relative">
           
           {tabs.map((tab) => {
              const isActive = activeTab === tab.id;
@@ -29,52 +29,47 @@ const Navbar: React.FC<NavbarProps> = ({ xp, activeTab, setActiveTab }) => {
                <button
                  key={tab.id}
                  onClick={() => setActiveTab(tab.id as ActiveTab)}
-                 className={`relative flex items-center justify-center w-14 h-14 rounded-2xl transition-all duration-300 group ${
+                 className={`relative flex items-center justify-center w-14 h-14 rounded-[1.5rem] transition-all duration-300 group ${
                    tab.primary 
-                     ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 scale-110 -translate-y-2 mx-2' 
+                     ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/30 scale-110 -translate-y-3 mx-2 hover:scale-115 active:scale-105' 
                      : isActive 
-                        ? 'bg-slate-100 text-slate-900' 
-                        : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
+                        ? 'bg-white text-emerald-600 shadow-sm' 
+                        : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'
                  }`}
                >
-                 <tab.icon className={`w-6 h-6 ${tab.primary ? 'w-7 h-7' : ''}`} />
+                 <tab.icon className={`transition-transform duration-300 ${tab.primary ? 'w-6 h-6' : 'w-6 h-6 group-hover:scale-110'}`} />
                  
-                 {/* Tooltip Label */}
-                 <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] font-bold py-1 px-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-md">
-                    {tab.label}
-                 </span>
-
-                 {/* Active Indicator Dot */}
+                 {/* Active Indicator Dot for non-primary */}
                  {!tab.primary && isActive && (
                    <motion.div 
                      layoutId="activeTabDot"
-                     className="absolute bottom-2 w-1 h-1 bg-emerald-500 rounded-full"
+                     className="absolute -bottom-1 w-1 h-1 bg-emerald-500 rounded-full"
                    />
                  )}
                </button>
              );
           })}
 
-          {/* XP Badge attached to dock */}
-          <div className="hidden md:flex absolute -right-32 top-1/2 -translate-y-1/2 items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200 shadow-sm">
-              <Award className="w-4 h-4 text-emerald-500" />
-              <span className="text-sm font-mono font-bold text-slate-700">{xp} XP</span>
-          </div>
-
         </div>
       </div>
 
-      {/* Mobile Top XP */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 p-4 flex justify-between items-center bg-gradient-to-b from-white/90 to-transparent pointer-events-none">
-         <div className="flex items-center gap-2 pointer-events-auto">
-             <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center backdrop-blur-md border border-emerald-100">
-               <Leaf className="w-4 h-4 text-emerald-500" />
-             </div>
-             <span className="font-display font-bold text-slate-900 tracking-tight">EcoSnap</span>
+      {/* Top Bar (XP) - Desktop: Top Right, Mobile: Top Full */}
+      <div className="fixed top-0 left-0 right-0 z-40 p-6 pointer-events-none flex justify-between items-start">
+         
+         {/* Mobile Brand */}
+         <div className="md:hidden flex items-center gap-2 pointer-events-auto opacity-0 animate-in fade-in duration-700">
+             {/* Hidden on mobile usually, but good for context if Dashboard isn't showing brand */}
          </div>
-         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-md border border-slate-200 shadow-sm pointer-events-auto">
-            <Award className="w-3 h-3 text-emerald-500" />
-            <span className="text-xs font-mono font-bold text-slate-700">{xp} XP</span>
+
+         {/* XP Pill */}
+         <div className="pointer-events-auto flex items-center gap-3 px-4 py-2 rounded-full bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg shadow-slate-200/50 hover:scale-105 transition-transform cursor-default ml-auto">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white shadow-sm">
+                <Award className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex flex-col leading-none">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Level 3</span>
+                <span className="text-sm font-display font-bold text-slate-900">{xp} XP</span>
+            </div>
          </div>
       </div>
     </>

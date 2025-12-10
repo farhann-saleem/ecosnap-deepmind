@@ -294,7 +294,7 @@ export const createLiveSession = async (
             speechConfig: {
                 voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
             },
-            systemInstruction: "You are EcoSnap's friendly AI Eco-Coach. Help the user with sustainable living tips, recycling advice, and motivation. Keep answers concise and encouraging.",
+            systemInstruction: "You are EcoSnap's AI Eco-Coach. You have eyes! You are receiving a live video feed of the user's surroundings. Proactively identify items you see (like trash, recycling, compost, or nature) and offer concise, friendly advice on how to handle them or improve the environment. Be enthusiastic and helpful.",
         }
     });
     return session;
