@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HistoryItem } from '../types';
-import { Play, Grid, Clock, Leaf } from 'lucide-react';
+import { Play, Grid, Clock, Leaf, Sparkles, Loader2, X } from 'lucide-react';
+import { generateEcoVideo } from '../services/geminiService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface GalleryProps {
     history: HistoryItem[];
@@ -8,8 +10,53 @@ interface GalleryProps {
 }
 
 const Gallery: React.FC<GalleryProps> = ({ history, onMockVideo }) => {
+    const [generatingId, setGeneratingId] = useState<string | null>(null);
+    const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+    const [videos, setVideos] = useState<Record<string, string>>({}); // Store generated video URLs
+
+    const handleGenerateVideo = async (item: HistoryItem) => {
+        if (videos[item.id]) {
+            setPlayingVideo(videos[item.id]);
+            return;
+        }
+
+        setGeneratingId(item.id);
+        const prompt = `Cinematic documentary nature shot. A time-lapse of ${item.result.itemName} (${item.result.category}) decomposing in a landfill versus being recycled into something new. Educational, hyper-realistic, 4k.`;
+        
+        try {
+            const videoUrl = await generateEcoVideo(prompt);
+            if (videoUrl) {
+                setVideos(prev => ({ ...prev, [item.id]: videoUrl }));
+                setPlayingVideo(videoUrl);
+            } else {
+                alert("Video generation failed. Please try again.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error generating video");
+        } finally {
+            setGeneratingId(null);
+        }
+    };
+
     return (
-        <div className="pt-24 pb-32 px-6 max-w-4xl mx-auto min-h-screen animate-in fade-in duration-500">
+        <div className="pt-24 pb-32 px-6 max-w-4xl mx-auto min-h-screen animate-in fade-in duration-500 relative">
+            
+            {/* Video Overlay */}
+            <AnimatePresence>
+                {playingVideo && (
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-md"
+                    >
+                        <button onClick={() => setPlayingVideo(null)} className="absolute top-6 right-6 text-white/50 hover:text-white"><X className="w-8 h-8"/></button>
+                        <div className="w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                            <video src={playingVideo} controls autoPlay className="w-full h-full object-contain" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <header className="mb-10 flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">My Eco Gallery</h1>
@@ -43,9 +90,7 @@ const Gallery: React.FC<GalleryProps> = ({ history, onMockVideo }) => {
                     {history.slice().reverse().map((item) => (
                         <div key={item.id} className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm group hover:shadow-xl transition-all">
                             <div className="h-40 bg-slate-100 relative overflow-hidden">
-                                {/* Placeholder Gradient since we don't store image URL in history in MVP types yet. 
-                                    In a real app, ScanResult would have imageUrl. 
-                                    For now, using a gradient based on category. */}
+                                {/* Placeholder Gradient based on category */}
                                 <div className={`absolute inset-0 bg-gradient-to-br ${
                                     item.result.category === 'Recyclable' ? 'from-emerald-100 to-slate-100' : 
                                     item.result.category === 'Trash' ? 'from-red-100 to-slate-100' : 'from-amber-100 to-slate-100'
@@ -71,11 +116,21 @@ const Gallery: React.FC<GalleryProps> = ({ history, onMockVideo }) => {
                                 
                                 <div className="flex gap-2">
                                     <button 
-                                        onClick={onMockVideo}
+                                        onClick={() => handleGenerateVideo(item)}
+                                        disabled={generatingId === item.id}
                                         className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold py-2.5 rounded-xl border border-slate-200 transition-colors flex items-center justify-center gap-2"
                                     >
-                                        <Play className="w-3 h-3 text-purple-500" />
-                                        Veo Video
+                                        {generatingId === item.id ? (
+                                            <>
+                                                <Loader2 className="w-3 h-3 animate-spin text-purple-500" />
+                                                Creating...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Play className="w-3 h-3 text-purple-500" />
+                                                {videos[item.id] ? "Watch Veo" : "Veo Video"}
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, ArrowRight, CheckCircle2, AlertCircle, Sparkles, X, Edit3, Info, ExternalLink, Lightbulb, Map as MapIcon } from 'lucide-react';
+import { Camera, ArrowRight, CheckCircle2, AlertCircle, Sparkles, X, Edit3, Info, ExternalLink, Lightbulb, Map as MapIcon, Volume2, StopCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AppState, ScanResult, QuizQuestion, StoryCard } from '../types';
 import { analyzeItem, generateImpactImage, generateQuiz, visualizeReuse, generateStoryContent } from '../services/geminiService';
@@ -18,6 +18,7 @@ const ScanFlow: React.FC<ScanFlowProps> = ({ onComplete, mockMode = false }) => 
   const [quiz, setQuiz] = useState<QuizQuestion | null>(null);
   const [quizAnswered, setQuizAnswered] = useState<number | null>(null);
   const [loadingMsg, setLoadingMsg] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
   
   // Reuse Feature
   const [showReuseModal, setShowReuseModal] = useState(false);
@@ -167,8 +168,30 @@ const ScanFlow: React.FC<ScanFlowProps> = ({ onComplete, mockMode = false }) => 
       // Correct!
     }
   };
+  
+  const toggleSpeech = () => {
+      if (!result) return;
+      
+      if (isSpeaking) {
+          window.speechSynthesis.cancel();
+          setIsSpeaking(false);
+          return;
+      }
+      
+      const text = `I see a ${result.itemName}. This is ${result.category}. ${result.reasoning} Here is what to do: ${result.disposalSteps.join(". ")}`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onend = () => setIsSpeaking(false);
+      // Try to select a good voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en')) || voices[0];
+      if(preferredVoice) utterance.voice = preferredVoice;
+      
+      setIsSpeaking(true);
+      window.speechSynthesis.speak(utterance);
+  }
 
   const finishFlow = () => {
+    window.speechSynthesis.cancel(); // Stop audio if playing
     if (result && quizAnswered !== null && quiz) {
         const isCorrect = quizAnswered === quiz.correctAnswerIndex;
         onComplete(result, isCorrect ? 15 : 5); 
@@ -178,6 +201,7 @@ const ScanFlow: React.FC<ScanFlowProps> = ({ onComplete, mockMode = false }) => 
         setQuizAnswered(null);
         setReusedImage(null);
         setDisposalMapUrl(null);
+        setIsSpeaking(false);
     }
   };
 
@@ -261,12 +285,21 @@ const ScanFlow: React.FC<ScanFlowProps> = ({ onComplete, mockMode = false }) => 
                 <p className="text-slate-200 text-sm font-sans drop-shadow-md">{result.materials.join(', ')}</p>
             </div>
             
-            <button 
-                onClick={() => setShowReuseModal(true)}
-                className="absolute top-4 right-4 p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-emerald-500 transition-colors border border-white/30"
-            >
-                <Edit3 className="w-5 h-5" />
-            </button>
+            {/* Action Buttons: Audio & Reuse */}
+            <div className="absolute top-4 right-4 flex flex-col gap-2">
+                <button 
+                    onClick={toggleSpeech}
+                    className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-emerald-500 transition-colors border border-white/30"
+                >
+                    {isSpeaking ? <StopCircle className="w-5 h-5 animate-pulse text-red-400" /> : <Volume2 className="w-5 h-5" />}
+                </button>
+                <button 
+                    onClick={() => setShowReuseModal(true)}
+                    className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-emerald-500 transition-colors border border-white/30"
+                >
+                    <Edit3 className="w-5 h-5" />
+                </button>
+            </div>
         </div>
 
         {/* Reuse Modal */}
